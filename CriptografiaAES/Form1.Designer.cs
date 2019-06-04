@@ -36,9 +36,10 @@
             // 
             // btnOrigem
             // 
-            this.btnOrigem.Location = new System.Drawing.Point(53, 29);
+            this.btnOrigem.Location = new System.Drawing.Point(47, 23);
+            this.btnOrigem.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnOrigem.Name = "btnOrigem";
-            this.btnOrigem.Size = new System.Drawing.Size(143, 70);
+            this.btnOrigem.Size = new System.Drawing.Size(127, 56);
             this.btnOrigem.TabIndex = 0;
             this.btnOrigem.Text = "Selecionar arquivo origem";
             this.btnOrigem.UseVisualStyleBackColor = true;
@@ -46,9 +47,10 @@
             // 
             // btnDestino
             // 
-            this.btnDestino.Location = new System.Drawing.Point(202, 29);
+            this.btnDestino.Location = new System.Drawing.Point(180, 23);
+            this.btnDestino.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnDestino.Name = "btnDestino";
-            this.btnDestino.Size = new System.Drawing.Size(132, 70);
+            this.btnDestino.Size = new System.Drawing.Size(117, 56);
             this.btnDestino.TabIndex = 1;
             this.btnDestino.Text = "Selecionar arquivo destino";
             this.btnDestino.UseVisualStyleBackColor = true;
@@ -56,17 +58,19 @@
             // 
             // txtChave
             // 
-            this.txtChave.Location = new System.Drawing.Point(44, 125);
+            this.txtChave.Location = new System.Drawing.Point(39, 100);
+            this.txtChave.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.txtChave.Name = "txtChave";
-            this.txtChave.Size = new System.Drawing.Size(317, 26);
+            this.txtChave.Size = new System.Drawing.Size(282, 22);
             this.txtChave.TabIndex = 2;
-            this.txtChave.Text = "chave de criptografia";
+            this.txtChave.Text = "20,1,94,33,199,0,48,9,31,94,112,40,59,30,100,248";
             // 
             // btnCriptografar
             // 
-            this.btnCriptografar.Location = new System.Drawing.Point(126, 177);
+            this.btnCriptografar.Location = new System.Drawing.Point(112, 142);
+            this.btnCriptografar.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.btnCriptografar.Name = "btnCriptografar";
-            this.btnCriptografar.Size = new System.Drawing.Size(129, 36);
+            this.btnCriptografar.Size = new System.Drawing.Size(115, 29);
             this.btnCriptografar.TabIndex = 3;
             this.btnCriptografar.Text = "Criptografar";
             this.btnCriptografar.UseVisualStyleBackColor = true;
@@ -74,13 +78,14 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(429, 237);
+            this.ClientSize = new System.Drawing.Size(381, 190);
             this.Controls.Add(this.btnCriptografar);
             this.Controls.Add(this.txtChave);
             this.Controls.Add(this.btnDestino);
             this.Controls.Add(this.btnOrigem);
+            this.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
             this.Name = "Form1";
             this.Text = "CriptografiaAES";
             this.ResumeLayout(false);

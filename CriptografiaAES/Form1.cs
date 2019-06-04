@@ -1,23 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace CriptografiaAES
 {
     public partial class Form1 : Form
     {
-        private String caminhoOrigem;
-        private String caminhoDestino;
+        private string caminhoOrigem;
+        private string caminhoDestino;
 
         public Form1()
         {
             InitializeComponent();
+            caminhoOrigem = "C:\\temp\\message_default.txt";
+            caminhoDestino = "C:\\temp\\message_encrypted.txt";
+
+            KeyMatrix keyMatrix = new KeyMatrix();
+            Console.WriteLine(" ## Construindo matriz de chave");
+
+            byte[,] stateMatrix = keyMatrix.GenerateStateMatrix(txtChave.Text);
+            keyMatrix.CreateKeySchedule(stateMatrix);
+            
         }
 
         private void btnOrigem_Click(object sender, EventArgs e)
@@ -27,8 +29,6 @@ namespace CriptografiaAES
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 caminhoOrigem = openFileDialog1.FileName;
-               // MessageBox.Show(caminhoOrigem);
-
             }
 
 
@@ -41,29 +41,21 @@ namespace CriptografiaAES
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 caminhoDestino = openFileDialog1.FileName;
-               // MessageBox.Show(caminhoDestino);
-
             }
 
         }
 
         private void btnCriptografar_Click(object sender, EventArgs e)
         {
-            Byte ts = 4e;
-
             if (txtChave.Text.Equals("chave de criptografia") || txtChave.Text.Equals(""))
             {
-                MessageBox.Show("Favor insira uma chave válida!");
+                MessageBox.Show("Favor inserir uma chave válida!");
             }
             else
             {
                 KeyMatrix t = new KeyMatrix();
-                Console.WriteLine(" ## Construindo matriz de chave");
-                byte[,] key =  t.TranformaChave(txtChave.Text);
-                Console.WriteLine("## keys" + key);
-
+                byte[,] key2 = t.GenerateStateMatrix(txtChave.Text);
             }
-
         }
     }
 }
