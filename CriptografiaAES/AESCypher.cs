@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
 
 namespace CriptografiaAES
 {
@@ -81,42 +82,82 @@ namespace CriptografiaAES
             this.keySchedule = keySchedule;
         }
 
-        public byte[,] GenerateStateMatrix(string keySeparetedByComma)
+        public List<byte[,]> GenerateStateMatrix(byte[] message)
         {
-            char[] keyBytes = keySeparetedByComma.ToCharArray();
+            List<byte[]> chunks = GenerateChunks(message);
+
+            List<byte[,]> listMatrix = new List<byte[,]>();
 
             byte[,] stateMatrix = new byte[4, 4];
 
-            int index = 0;
-            for (int i = 0; i < 4; i++)
+            foreach(byte[] chunk in chunks)
             {
-                for (int j = 0; j < 4; j++)
-                    stateMatrix[j, i] = (byte)keyBytes[index++];
+                byte[,] matrix = ConvertArrayToMatrix(chunk);
+                listMatrix.Add(matrix);
             }
 
             Console.WriteLine();
             Console.WriteLine("+--- Mensagem ---+");
             Console.WriteLine();
             PrintMatrix(stateMatrix);
-            return stateMatrix;
+            return listMatrix;
         }
 
-        public byte[,] GenerateStateMatrix(byte[] key)
+        private List<byte[]> GenerateChunks(byte[] message)
         {
-            byte[,] stateMatrix = new byte[4, 4];
 
+            byte[] filledMessage = FillMessage(message);
+
+            List<byte[]> chunks = new List<byte[]>();
+            int i;
+            for (i = 0; i < filledMessage.Length; i += 16)
+            {
+                byte[] chunk = new byte[16];
+                Array.Copy(filledMessage, i, chunk, 0, 16);
+                chunks.Add(chunk);
+            }
+            
+            return chunks;
+        }
+
+        private byte[] FillMessage(byte[] message)
+        {
+            int diff = message.Length % 16;
+
+            byte[] filledMessage = new byte[message.Length + 16-diff];
+
+            int i;
+            for(i = 0; i < message.Length; i++)
+                filledMessage[i] = message[i];
+
+            for (int j = i; j < filledMessage.Length; j++)
+                filledMessage[j] = Encoding.ASCII.GetBytes(diff.ToString())[0];
+
+            return filledMessage;
+        }
+
+        private byte[,] ConvertArrayToMatrix(byte[] array)
+        {
+            byte[,] matrix = new byte[4, 4];
             int index = 0;
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 4; j++)
-                    stateMatrix[j, i] = key[index++];
+                    matrix[j, i] = array[index++];
+            }
+            return matrix;
+        }
+
+        public List<byte[,]> EncryptChunks(List<byte[,]> messageChunks)
+        {
+            List<byte[,]> encryptedChunks = new List<byte[,]>();
+            foreach (byte[,] chunk in messageChunks)
+            {
+                byte[,] encryptedChunk = Encrypt(chunk);
+                encryptedChunks.Add(encryptedChunk);
             }
 
-            Console.WriteLine();
-            Console.WriteLine("+--- Mensagem ---+");
-            Console.WriteLine();
-            PrintMatrix(stateMatrix);
-            return stateMatrix;
+            return encryptedChunks;
         }
 
         public byte[,] Encrypt(byte[,] messageMatrix)
@@ -288,6 +329,15 @@ namespace CriptografiaAES
             return b;
         }
 
+        public void PrintEncryptedChunks(List<byte[,]> chunks)
+        {
+            for (int i = 0; i < chunks.Count; i++)
+            {
+                Console.WriteLine("\n+--- Mensagem cifrada {0} ---+\n", i);
+                PrintMatrix(chunks[i]);
+            }
+        }
+
         public void PrintMatrix(byte[,] matrix)
         {
             int rowCount = matrix.GetLength(0);
@@ -301,12 +351,29 @@ namespace CriptografiaAES
             }
         }
 
-        private void PrintWord(byte[] word, string title)
+        public void PrintArray(byte[] message)
         {
+            for (int i = 0; i < message.Length; i++)
+                Console.Write("{0}, ", message[i]);
             Console.WriteLine();
-            Console.WriteLine("+--- {0} ---+", title);
-            for (int col = 0; col < word.Length; col++)
-                Console.WriteLine("0x" + string.Format("{0:x}", word[col]));
+        }
+
+        public void SaveEncryptedMessageInFile(string filePath, List<byte[,]> encryptedMessage)
+        {
+            int size = encryptedMessage.Count * 16;
+            byte[] data = new byte[size];
+            int index = 0;
+            foreach (byte[,] chunk in encryptedMessage)
+            {
+                for (int i = 0; i < chunk.GetLength(0); i++)
+                {
+                    for (int j = 0; j < chunk.GetLength(1); j++)
+                        data[index++] = chunk[i, j];
+                }
+            }
+
+            PrintArray(data);
+            File.WriteAllBytes(filePath, data);
         }
 
         public void SaveEncryptedMessageInFile(string filePath, byte[,] encryptedMessage)

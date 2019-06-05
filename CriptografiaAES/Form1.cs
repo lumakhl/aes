@@ -39,7 +39,7 @@ namespace CriptografiaAES
 
         private void btnCriptografar_Click(object sender, EventArgs e)
         {
-            if (txtChave.Text.Equals(""))
+            if (txtChave.Text.Equals("") || txtChave.Text.Split(',').Length < 16)
             {
                 MessageBox.Show("Favor inserir uma chave válida!");
             }
@@ -53,11 +53,10 @@ namespace CriptografiaAES
                 List<byte[,]> keySchedule = keyMatrix.CreateKeySchedule(stateMatrix);
 
                 AESCypher cypher = new AESCypher(keySchedule);
-                byte[,] messageMatrix = cypher.GenerateStateMatrix(message);
+                List<byte[,]> messageMatrix = cypher.GenerateStateMatrix(message);
 
-                byte[,] encryptedMessage = cypher.Encrypt(messageMatrix);
-                Console.WriteLine("\n+--- Mensagem cifrada ---+\n");
-                cypher.PrintMatrix(encryptedMessage);
+                List<byte[,]> encryptedMessage = cypher.EncryptChunks(messageMatrix);
+                cypher.PrintEncryptedChunks(encryptedMessage);
 
                 cypher.SaveEncryptedMessageInFile(caminhoDestino, encryptedMessage);
                 Console.WriteLine("\nA mensagem cifrada foi salva no arquivo de destino com sucesso.\n");
