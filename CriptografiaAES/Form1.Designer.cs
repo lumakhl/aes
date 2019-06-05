@@ -63,7 +63,7 @@
             this.txtChave.Name = "txtChave";
             this.txtChave.Size = new System.Drawing.Size(282, 22);
             this.txtChave.TabIndex = 2;
-            this.txtChave.Text = "20,1,94,33,199,0,48,9,31,94,112,40,59,30,100,248";
+            this.txtChave.Text = "65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80";
             // 
             // btnCriptografar
             // 

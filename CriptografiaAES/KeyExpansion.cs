@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace CriptografiaAES
 {
-    class KeyMatrix
+    class KeyExpansion
     {
 
         private List<byte[,]> keySchedule = new List<byte[,]>();
@@ -31,7 +31,7 @@ namespace CriptografiaAES
 
         private byte[] roundConstantList = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36 };
 
-        public KeyMatrix() { }
+        public KeyExpansion() { }
 
         public byte[,] GenerateStateMatrix(string keySeparetedByComma)
         {
@@ -46,36 +46,39 @@ namespace CriptografiaAES
                     stateMatrix[j, i] = byte.Parse(keyBytes[index++]);
             }
 
-            //PrintMatrix(stateMatrix);
+            Console.WriteLine("\n+--- Chave ---+\n");
+            PrintMatrix(stateMatrix);
             return stateMatrix;
         }
 
-        public void CreateKeySchedule(byte[,] initialKey)
+        public List<byte[,]> CreateKeySchedule(byte[,] initialKey)
         {
             keySchedule.Add(initialKey);
 
-            //CreateFirstWord(initialKey);
+            int roundKeyNumber = 0;
 
-            while(keySchedule.Count < 11)
+            while (keySchedule.Count < 11)
             {
-                byte[,] newRoundKey = CreateRoundKey(keySchedule.Last());
+                byte[,] newRoundKey = CreateRoundKey(keySchedule.Last(), roundKeyNumber);
                 keySchedule.Add(newRoundKey);
+                roundKeyNumber++;
             }
 
             PrintKeySchedule(keySchedule);
+            return keySchedule;
         }
 
-        private byte[,] CreateRoundKey(byte[,] previousRoundKey)
+        private byte[,] CreateRoundKey(byte[,] previousRoundKey, int roundKeyNumber)
         {
             int size = previousRoundKey.GetLength(0);
             byte[,] newRoundKey = new byte[size, size];
 
-            byte[] firstNewWord = CreateFirstWord(previousRoundKey);
+            byte[] firstNewWord = CreateFirstWord(previousRoundKey, roundKeyNumber);
             byte[] secondNewWord = XorOperation(GetColumnFromMatrix(previousRoundKey, 1), firstNewWord);
-            byte[] thirdNewWord  = XorOperation(GetColumnFromMatrix(previousRoundKey, 2), secondNewWord);
+            byte[] thirdNewWord = XorOperation(GetColumnFromMatrix(previousRoundKey, 2), secondNewWord);
             byte[] fourthNewWord = XorOperation(GetColumnFromMatrix(previousRoundKey, 3), thirdNewWord);
 
-            for(int i = 0; i < size; i++)
+            for (int i = 0; i < size; i++)
             {
                 newRoundKey[i, 0] = firstNewWord[i];
                 newRoundKey[i, 1] = secondNewWord[i];
@@ -86,52 +89,44 @@ namespace CriptografiaAES
             return newRoundKey;
         }
 
-        public byte[] CreateFirstWord(byte[,] previousRoundKey)
+        public byte[] CreateFirstWord(byte[,] previousRoundKey, int roundKeyNumber)
         {
             byte[] lastWord = CopyLastWord(previousRoundKey);
-            //PrintWord(lastWord, "1. CopyLastWord");
 
             RotWord(lastWord);
-            //PrintWord(lastWord, "2. RotWord");
 
             SubWord(lastWord);
-            //PrintWord(lastWord, "3. SubWord");
 
-            byte[] roundConstant = GenerateRoundConstant(lastWord, 0);
-            //PrintWord(roundConstant, "4. GenerateRoundConstant");
+            byte[] roundConstant = GenerateRoundConstant(lastWord, roundKeyNumber);
 
             byte[] xorWord = XorSubWordAndRoundConstant(lastWord, roundConstant);
-            //PrintWord(xorWord, "5. XorSubWordAndRoundConstant");
 
             byte[] firstWord = GetColumnFromMatrix(previousRoundKey, 0);
             byte[] newWord = XorFirstWordWithXorWord(firstWord, xorWord);
-            //PrintWord(newWord, "6. XorFirstWordWithXorWord");
 
             return newWord;
         }
 
-        // first step
         public byte[] CopyLastWord(byte[,] matrix)
         {
             return GetColumnFromMatrix(matrix, matrix.GetLength(1) - 1);
         }
 
-        // second step
         private void RotWord(byte[] word)
         {
             byte first = word[0];
-            byte last = word[word.Length - 1];
 
-            word[0] = last;
-            word[word.Length - 1] = first;
+            word[0] = word[1];
+            word[1] = word[2];
+            word[2] = word[3];
+            word[3] = first;
         }
 
-        // third step
         private void SubWord(byte[] word)
         {
             const byte mask = 0x0F;
 
-            for(int i = 0; i < word.Length; i++)
+            for (int i = 0; i < word.Length; i++)
             {
                 int MSB = (word[i] >> 4) & mask;
                 int LSB = word[i] & mask;
@@ -140,7 +135,6 @@ namespace CriptografiaAES
             }
         }
 
-        // fourth step
         private byte[] GenerateRoundConstant(byte[] word, int roundKeyNumber)
         {
             byte[] roundConstant = { 0, 0, 0, 0 };
@@ -149,13 +143,11 @@ namespace CriptografiaAES
             return roundConstant;
         }
 
-        // fifth step
         private byte[] XorSubWordAndRoundConstant(byte[] word, byte[] roundConstant)
         {
             return XorOperation(word, roundConstant);
         }
 
-        // sixth step
         private byte[] XorFirstWordWithXorWord(byte[] firstWord, byte[] xorWord)
         {
             return XorOperation(firstWord, xorWord);
@@ -180,32 +172,25 @@ namespace CriptografiaAES
 
         private void PrintKeySchedule(List<byte[,]> roundKeyList)
         {
-            Console.WriteLine("+--- KeySchedule ---+");
-            for(int i = 0; i < roundKeyList.Count; i++)
-                PrintMatrix(roundKeyList[i], i);
+            for (int i = 0; i < roundKeyList.Count; i++)
+            {
+                Console.WriteLine("\n+--- RoundKey {0} ---+\n", i);
+                PrintMatrix(roundKeyList[i]);
+            }
         }
 
-        private void PrintMatrix(byte[,] matrix, int RoundKeyNumber = -1)
+        private void PrintMatrix(byte[,] matrix)
         {
             int rowCount = matrix.GetLength(0);
             int colCount = matrix.GetLength(1);
 
-            Console.WriteLine();
-            Console.WriteLine("+--- RoundKey {0} ---+", RoundKeyNumber);
             for (int row = 0; row < rowCount; row++)
             {
                 for (int col = 0; col < colCount; col++)
-                    Console.Write(String.Format("{0}\t", matrix[row, col]));
+                    Console.Write("0x" + string.Format("{0:x} \t", matrix[row, col]));
                 Console.WriteLine();
             }
         }
-
-        private void PrintWord(byte[] word, string title)
-        {
-            Console.WriteLine();
-            Console.WriteLine("+--- {0} ---+", title);
-            for (int col = 0; col < word.Length; col++)
-                Console.WriteLine(word[col]);
-        }
+        
     }
 }
