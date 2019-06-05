@@ -171,9 +171,7 @@ namespace CriptografiaAES
             for (int i = 0; i < first.GetLength(0); i++)
             {
                 for (int j = 0; j < first.GetLength(1); j++)
-                {
                     xorArray[i,j] = (byte)(first[i,j] ^ second[i,j]);
-                }
             }
 
             return xorArray;
@@ -240,9 +238,7 @@ namespace CriptografiaAES
             for (int i = 0; i < matrix.GetLength(0); i++)
             {
                 for (int j = 0; j < matrix.GetLength(1); j++)
-                {
                     mixMatrix[i, j] = CalculateBValue(matrix, i, j);
-                }
             }
 
             Console.WriteLine();
@@ -322,9 +318,7 @@ namespace CriptografiaAES
             for (int i = 0; i < encryptedMessage.GetLength(0); i++)
             {
                 for (int j = 0; j < encryptedMessage.GetLength(1); j++)
-                {
                     data[index++] = encryptedMessage[i, j];
-                }
             }
 
             File.WriteAllBytes(filePath, data);

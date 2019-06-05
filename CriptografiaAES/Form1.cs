@@ -13,24 +13,6 @@ namespace CriptografiaAES
         public Form1()
         {
             InitializeComponent();
-            /*
-            caminhoOrigem = "C:\\temp\\message_default.txt";
-            caminhoDestino = "C:\\temp\\message_encrypted.txt";
-
-            KeyMatrix keyMatrix = new KeyMatrix();
-
-            byte[,] stateMatrix = keyMatrix.GenerateStateMatrix("65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80");
-
-
-            List<byte[,]> keySchedule = keyMatrix.CreateKeySchedule(stateMatrix);
-
-            AESCypher cypher = new AESCypher(keySchedule);
-            byte[,] messageMatrix = cypher.GenerateStateMatrix("DESENVOLVIMENTO!");
-
-            byte[,] encryptedMessage = cypher.Encrypt(messageMatrix);
-            Console.WriteLine("\n+--- Mensagem cifrada ---+\n");
-            cypher.PrintMatrix(encryptedMessage);
-            */
         }
 
         private void btnOrigem_Click(object sender, EventArgs e)
@@ -65,7 +47,7 @@ namespace CriptografiaAES
             {
                 byte[] message = File.ReadAllBytes(caminhoOrigem);
 
-                KeyMatrix keyMatrix = new KeyMatrix();
+                KeyExpansion keyMatrix = new KeyExpansion();
                 byte[,] stateMatrix = keyMatrix.GenerateStateMatrix(txtChave.Text);
 
                 List<byte[,]> keySchedule = keyMatrix.CreateKeySchedule(stateMatrix);

@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace CriptografiaAES
 {
-    class KeyMatrix
+    class KeyExpansion
     {
 
         private List<byte[,]> keySchedule = new List<byte[,]>();
@@ -31,7 +31,7 @@ namespace CriptografiaAES
 
         private byte[] roundConstantList = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1B, 0x36 };
 
-        public KeyMatrix() { }
+        public KeyExpansion() { }
 
         public byte[,] GenerateStateMatrix(string keySeparetedByComma)
         {
