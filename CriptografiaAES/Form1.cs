@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Windows.Forms;
 
 namespace CriptografiaAES
@@ -11,15 +13,24 @@ namespace CriptografiaAES
         public Form1()
         {
             InitializeComponent();
+            /*
             caminhoOrigem = "C:\\temp\\message_default.txt";
             caminhoDestino = "C:\\temp\\message_encrypted.txt";
 
             KeyMatrix keyMatrix = new KeyMatrix();
-            Console.WriteLine(" ## Construindo matriz de chave");
 
-            byte[,] stateMatrix = keyMatrix.GenerateStateMatrix(txtChave.Text);
-            keyMatrix.CreateKeySchedule(stateMatrix);
-            
+            byte[,] stateMatrix = keyMatrix.GenerateStateMatrix("65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80");
+
+
+            List<byte[,]> keySchedule = keyMatrix.CreateKeySchedule(stateMatrix);
+
+            AESCypher cypher = new AESCypher(keySchedule);
+            byte[,] messageMatrix = cypher.GenerateStateMatrix("DESENVOLVIMENTO!");
+
+            byte[,] encryptedMessage = cypher.Encrypt(messageMatrix);
+            Console.WriteLine("\n+--- Mensagem cifrada ---+\n");
+            cypher.PrintMatrix(encryptedMessage);
+            */
         }
 
         private void btnOrigem_Click(object sender, EventArgs e)
@@ -30,7 +41,6 @@ namespace CriptografiaAES
             {
                 caminhoOrigem = openFileDialog1.FileName;
             }
-
 
         }
 
@@ -47,14 +57,28 @@ namespace CriptografiaAES
 
         private void btnCriptografar_Click(object sender, EventArgs e)
         {
-            if (txtChave.Text.Equals("chave de criptografia") || txtChave.Text.Equals(""))
+            if (txtChave.Text.Equals(""))
             {
                 MessageBox.Show("Favor inserir uma chave válida!");
             }
             else
             {
-                KeyMatrix t = new KeyMatrix();
-                byte[,] key2 = t.GenerateStateMatrix(txtChave.Text);
+                byte[] message = File.ReadAllBytes(caminhoOrigem);
+
+                KeyMatrix keyMatrix = new KeyMatrix();
+                byte[,] stateMatrix = keyMatrix.GenerateStateMatrix(txtChave.Text);
+
+                List<byte[,]> keySchedule = keyMatrix.CreateKeySchedule(stateMatrix);
+
+                AESCypher cypher = new AESCypher(keySchedule);
+                byte[,] messageMatrix = cypher.GenerateStateMatrix(message);
+
+                byte[,] encryptedMessage = cypher.Encrypt(messageMatrix);
+                Console.WriteLine("\n+--- Mensagem cifrada ---+\n");
+                cypher.PrintMatrix(encryptedMessage);
+
+                cypher.SaveEncryptedMessageInFile(caminhoDestino, encryptedMessage);
+                Console.WriteLine("\nA mensagem cifrada foi salva no arquivo de destino com sucesso.\n");
             }
         }
     }
