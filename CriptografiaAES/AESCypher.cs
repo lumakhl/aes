@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace CriptografiaAES
@@ -88,18 +89,12 @@ namespace CriptografiaAES
 
             List<byte[,]> listMatrix = new List<byte[,]>();
 
-            byte[,] stateMatrix = new byte[4, 4];
-
             foreach(byte[] chunk in chunks)
             {
                 byte[,] matrix = ConvertArrayToMatrix(chunk);
                 listMatrix.Add(matrix);
             }
-
-            Console.WriteLine();
-            Console.WriteLine("+--- Mensagem ---+");
-            Console.WriteLine();
-            PrintMatrix(stateMatrix);
+            
             return listMatrix;
         }
 
@@ -130,8 +125,9 @@ namespace CriptografiaAES
             for(i = 0; i < message.Length; i++)
                 filledMessage[i] = message[i];
 
-            for (int j = i; j < filledMessage.Length; j++)
-                filledMessage[j] = Encoding.ASCII.GetBytes(diff.ToString())[0];
+            for (int j = i; j < filledMessage.Length; j++) {
+                filledMessage[j] = (byte)(16 - diff);
+            }
 
             return filledMessage;
         }
@@ -309,7 +305,6 @@ namespace CriptografiaAES
                     continue;
                 }
 
-
                 int MSB1 = (matrix[k, column] >> 4) & mask;
                 int LSB1 = matrix[k, column] & mask;
 
@@ -358,7 +353,7 @@ namespace CriptografiaAES
             Console.WriteLine();
         }
 
-        public void SaveEncryptedMessageInFile(string filePath, List<byte[,]> encryptedMessage)
+        public byte[] SaveEncryptedMessageInFile(string filePath, List<byte[,]> encryptedMessage)
         {
             int size = encryptedMessage.Count * 16;
             byte[] data = new byte[size];
@@ -368,27 +363,41 @@ namespace CriptografiaAES
                 for (int i = 0; i < chunk.GetLength(0); i++)
                 {
                     for (int j = 0; j < chunk.GetLength(1); j++)
-                        data[index++] = chunk[i, j];
+                        data[index++] = chunk[j, i];
                 }
             }
 
             PrintArray(data);
             File.WriteAllBytes(filePath, data);
+
+            return data;
         }
 
-        public void SaveEncryptedMessageInFile(string filePath, byte[,] encryptedMessage)
+        public string AesDecrypt(byte[] inputBytes, byte[] key)
         {
-            int size = encryptedMessage.GetLength(0) * encryptedMessage.GetLength(1);
-            byte[] data = new byte[size];
+            byte[] outputBytes = inputBytes;
 
-            int index = 0;
-            for (int i = 0; i < encryptedMessage.GetLength(0); i++)
+            string plaintext = string.Empty;
+
+            RijndaelManaged AES = new RijndaelManaged();
+            AES.Padding = PaddingMode.PKCS7;
+            AES.Mode = CipherMode.ECB;
+            AES.KeySize = 128;
+            AES.BlockSize = 128;
+
+            using (MemoryStream memoryStream = new MemoryStream(outputBytes))
             {
-                for (int j = 0; j < encryptedMessage.GetLength(1); j++)
-                    data[index++] = encryptedMessage[i, j];
+                using (CryptoStream cryptoStream = new CryptoStream(memoryStream, AES.CreateDecryptor(key, key), CryptoStreamMode.Read))
+                {
+                    using (StreamReader srDecrypt = new StreamReader(cryptoStream))
+                    {
+                        plaintext = srDecrypt.ReadToEnd();
+                    }
+                }
             }
 
-            File.WriteAllBytes(filePath, data);
+            Console.WriteLine("Mensagem descriptografada: " + plaintext);
+            return plaintext;
         }
 
     }

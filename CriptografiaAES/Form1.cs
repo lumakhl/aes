@@ -18,7 +18,6 @@ namespace CriptografiaAES
         private void btnOrigem_Click(object sender, EventArgs e)
         {
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
-            openFileDialog1.Filter = "Arquivo de Texto|*.txt";
             if (openFileDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 caminhoOrigem = openFileDialog1.FileName;
@@ -47,10 +46,10 @@ namespace CriptografiaAES
             {
                 byte[] message = File.ReadAllBytes(caminhoOrigem);
 
-                KeyExpansion keyMatrix = new KeyExpansion();
-                byte[,] stateMatrix = keyMatrix.GenerateStateMatrix(txtChave.Text);
+                KeyExpansion keyExpansion = new KeyExpansion();
+                byte[,] stateMatrix = keyExpansion.GenerateStateMatrix(txtChave.Text);
 
-                List<byte[,]> keySchedule = keyMatrix.CreateKeySchedule(stateMatrix);
+                List<byte[,]> keySchedule = keyExpansion.CreateKeySchedule(stateMatrix);
 
                 AESCypher cypher = new AESCypher(keySchedule);
                 List<byte[,]> messageMatrix = cypher.GenerateStateMatrix(message);
@@ -58,9 +57,13 @@ namespace CriptografiaAES
                 List<byte[,]> encryptedMessage = cypher.EncryptChunks(messageMatrix);
                 cypher.PrintEncryptedChunks(encryptedMessage);
 
-                cypher.SaveEncryptedMessageInFile(caminhoDestino, encryptedMessage);
+                byte[] mess = cypher.SaveEncryptedMessageInFile(caminhoDestino, encryptedMessage);
                 Console.WriteLine("\nA mensagem cifrada foi salva no arquivo de destino com sucesso.\n");
+
+                byte[] key = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+                cypher.AesDecrypt(mess, key);
             }
         }
+        
     }
 }
